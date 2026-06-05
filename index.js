@@ -90,7 +90,82 @@ async function startBot() {
     version,
     auth: state
   });
+// ===============================
+// DIAGNOSTIC LOGGING
+// ===============================
 
+console.log("🚀 Socket created");
+
+// Log every connection update
+sock.ev.on("connection.update", (update) => {
+  console.log("🔄 CONNECTION UPDATE:");
+  console.log(JSON.stringify(update, null, 2));
+});
+
+// Log incoming messages
+sock.ev.on("messages.upsert", (data) => {
+  console.log("📨 MESSAGES.UPSERT:");
+  console.log(JSON.stringify(data, null, 2));
+});
+
+// Log message updates
+sock.ev.on("messages.update", (data) => {
+  console.log("✏️ MESSAGES.UPDATE:");
+  console.log(JSON.stringify(data, null, 2));
+});
+
+// Log message deletions
+sock.ev.on("messages.delete", (data) => {
+  console.log("🗑️ MESSAGES.DELETE:");
+  console.log(JSON.stringify(data, null, 2));
+});
+
+// Log receipts
+sock.ev.on("message-receipt.update", (data) => {
+  console.log("📬 RECEIPT UPDATE:");
+  console.log(JSON.stringify(data, null, 2));
+});
+
+// Log chats
+sock.ev.on("chats.upsert", (data) => {
+  console.log("💬 CHATS.UPSERT:");
+  console.log(JSON.stringify(data, null, 2));
+});
+
+sock.ev.on("chats.update", (data) => {
+  console.log("💬 CHATS.UPDATE:");
+  console.log(JSON.stringify(data, null, 2));
+});
+
+// Contacts
+sock.ev.on("contacts.upsert", (data) => {
+  console.log("👤 CONTACTS.UPSERT:");
+  console.log(JSON.stringify(data, null, 2));
+});
+
+sock.ev.on("contacts.update", (data) => {
+  console.log("👤 CONTACTS.UPDATE:");
+  console.log(JSON.stringify(data, null, 2));
+});
+
+// Presence
+sock.ev.on("presence.update", (data) => {
+  console.log("🟢 PRESENCE.UPDATE:");
+  console.log(JSON.stringify(data, null, 2));
+});
+
+// Credentials
+sock.ev.on("creds.update", () => {
+  console.log("🔑 CREDS.UPDATE");
+});
+
+// General event debugging
+const originalEmit = sock.ev.emit.bind(sock.ev);
+
+sock.ev.emit = function (...args) {
+  console.log("🔥 EVENT:", args[0]);
+  return originalEmit(...args);
+};
   global.sock = sock;
   global.saveCreds = saveCreds;
 
@@ -106,8 +181,10 @@ async function startBot() {
       qrcode.generate(qr, { small: true });
     }
     if (connection === "open") {
-      console.log("✅ WhatsApp connected!");
-    }
+		console.log("✅ WhatsApp connected!");
+		console.log("👤 Connected user:");
+		console.log(JSON.stringify(sock.user, null, 2));
+         }
     if (connection === "close") {
       const statusCode = lastDisconnect?.error?.output?.statusCode;
       console.warn("⚠️ Disconnected, status code:", statusCode);
